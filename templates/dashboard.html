@@ -1,0 +1,841 @@
+{% extends "base.html" %}
+
+{% block title %}SOC Dashboard - CYBERWATCH{% endblock %}
+
+{% block content %}
+
+<style>
+    /* =========================================
+       PROFESSIONAL SOC DASHBOARD
+       FRONTEND ONLY - BACKEND UNCHANGED
+       ========================================= */
+
+    .soc-dashboard {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding-bottom: 30px;
+    }
+
+    /* ---------- HEADER ---------- */
+
+    .soc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .soc-title h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #f8fafc;
+        letter-spacing: -0.5px;
+    }
+
+    .soc-title p {
+        margin: 7px 0 0;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .system-status {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: #6ee7b7;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 10px #10b981;
+    }
+
+    /* ---------- SECTION LABEL ---------- */
+
+    .section-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    /* ---------- STAT CARDS ---------- */
+
+    .soc-stats {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .soc-stat-card {
+        position: relative;
+        background: linear-gradient(145deg, #1e293b, #172033);
+        border: 1px solid #2b3b52;
+        border-radius: 12px;
+        padding: 20px;
+        overflow: hidden;
+        transition: 0.25s ease;
+    }
+
+    .soc-stat-card:hover {
+        transform: translateY(-3px);
+        border-color: #3b82f6;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .soc-stat-card::after {
+        content: "";
+        position: absolute;
+        right: -20px;
+        bottom: -20px;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.06);
+    }
+
+    .stat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .stat-label {
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: rgba(59, 130, 246, 0.12);
+        font-size: 18px;
+    }
+
+    .stat-value {
+        color: #f8fafc;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-footer {
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .danger-value {
+        color: #f87171;
+    }
+
+    .success-value {
+        color: #34d399;
+    }
+
+    .warning-value {
+        color: #fbbf24;
+    }
+
+    /* ---------- MAIN GRID ---------- */
+
+    .soc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* ---------- PANELS ---------- */
+
+    .soc-panel {
+        background: #1e293b;
+        border: 1px solid #2b3b52;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #2b3b52;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .panel-title {
+        margin: 0;
+        font-size: 15px;
+        color: #f1f5f9;
+        font-weight: 600;
+    }
+
+    .panel-subtitle {
+        font-size: 11px;
+        color: #64748b;
+        text-align: right;
+    }
+
+    .panel-body {
+        padding: 8px 20px 20px;
+        overflow-x: auto;
+    }
+
+    /* ---------- TABLE ---------- */
+
+    .soc-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .soc-table th {
+        text-align: left;
+        padding: 13px 10px;
+        color: #64748b;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        border-bottom: 1px solid #334155;
+        white-space: nowrap;
+    }
+
+    .soc-table td {
+        padding: 14px 10px;
+        color: #cbd5e1;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    }
+
+    .soc-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .soc-table tbody tr {
+        transition: 0.2s ease;
+    }
+
+    .soc-table tbody tr:hover {
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .ip-address {
+        font-family: Consolas, monospace;
+        color: #93c5fd !important;
+    }
+
+    /* ---------- BADGES ---------- */
+
+    .soc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .attack-badge {
+        color: #fca5a5;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .normal-badge {
+        color: #6ee7b7;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    /* ---------- ATTACK TYPE ---------- */
+
+    .attack-type {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .attack-indicator {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f87171;
+        box-shadow: 0 0 8px rgba(248, 113, 113, 0.7);
+        flex-shrink: 0;
+    }
+
+    .normal-indicator {
+        background: #34d399;
+        box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+    }
+
+    /* ---------- CONFIDENCE BAR ---------- */
+
+    .confidence-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 130px;
+    }
+
+    .confidence-bar {
+        width: 70px;
+        height: 6px;
+        background: #334155;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #3b82f6, #22d3ee);
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    .confidence-text {
+        font-size: 11px;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    /* ---------- ACTIVITY ---------- */
+
+    .activity-panel {
+        margin-top: 20px;
+    }
+
+    /* ---------- EMPTY STATE ---------- */
+
+    .soc-empty {
+        padding: 35px 10px;
+        text-align: center;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+
+    @media (max-width: 1200px) {
+        .soc-stats {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 850px) {
+        .soc-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .soc-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 550px) {
+        .soc-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .soc-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .soc-table th,
+        .soc-table td {
+            padding: 10px 5px;
+        }
+    }
+</style>
+
+
+<div class="soc-dashboard">
+
+    <!-- HEADER -->
+
+    <div class="soc-header">
+
+        <div class="soc-title">
+            <h1>Security Operations Center</h1>
+            <p>Real-time network threat detection and security monitoring</p>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            SYSTEM OPERATIONAL
+        </div>
+
+    </div>
+
+
+    <!-- SECURITY OVERVIEW -->
+
+    <div class="section-label">
+        Security Overview
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="soc-stats">
+
+        <div class="soc-stat-card">
+
+            <div class="stat-top">
+                <div class="stat-label">
+                    Total Predictions
+                </div>
+
+                <div class="stat-icon">
+                    📊
+                </div>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.total_predictions }}
+            </div>
+
+            <div class="stat-footer">
+                Total network events analyzed
+            </div>
+
+        </div>
+
+
+        <div class="soc-stat-card">
+
+            <div class="stat-top">
+                <div class="stat-label">
+                    Threats Detected
+                </div>
+
+                <div class="stat-icon">
+                    🚨
+                </div>
+            </div>
+
+            <div class="stat-value danger-value">
+                {{ stats.attacks_detected }}
+            </div>
+
+            <div class="stat-footer">
+                Suspicious activities identified
+            </div>
+
+        </div>
+
+
+        <div class="soc-stat-card">
+
+            <div class="stat-top">
+                <div class="stat-label">
+                    Normal Traffic
+                </div>
+
+                <div class="stat-icon">
+                    ✓
+                </div>
+            </div>
+
+            <div class="stat-value success-value">
+                {{ stats.normal_traffic }}
+            </div>
+
+            <div class="stat-footer">
+                Verified legitimate traffic
+            </div>
+
+        </div>
+
+
+        <div class="soc-stat-card">
+
+            <div class="stat-top">
+                <div class="stat-label">
+                    Detection Rate
+                </div>
+
+                <div class="stat-icon">
+                    🎯
+                </div>
+            </div>
+
+            <div class="stat-value warning-value">
+                {{ stats.detection_rate }}%
+            </div>
+
+            <div class="stat-footer">
+                Current threat detection rate
+            </div>
+
+        </div>
+
+
+        <div class="soc-stat-card">
+
+            <div class="stat-top">
+                <div class="stat-label">
+                    Avg. Confidence
+                </div>
+
+                <div class="stat-icon">
+                    🛡️
+                </div>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.avg_confidence }}%
+            </div>
+
+            <div class="stat-footer">
+                Average model confidence
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- THREAT INTELLIGENCE -->
+
+    <div class="soc-grid">
+
+
+        <!-- ATTACK TYPES -->
+
+        <div class="soc-panel">
+
+            <div class="panel-header">
+
+                <h3 class="panel-title">
+                    Threat Classification
+                </h3>
+
+                <span class="panel-subtitle">
+                    Detected attack categories
+                </span>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                {% if stats.attack_types %}
+
+                <table class="soc-table">
+
+                    <thead>
+                        <tr>
+                            <th>Threat Type</th>
+                            <th>Events</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for a in stats.attack_types %}
+
+                        <tr>
+
+                            <td>
+
+                                <div class="attack-type">
+
+                                    {% if a.attack_type == 'Normal' %}
+
+                                    <span class="attack-indicator normal-indicator"></span>
+
+                                    {% else %}
+
+                                    <span class="attack-indicator"></span>
+
+                                    {% endif %}
+
+                                    {{ a.attack_type }}
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                {{ a.count }}
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                {% else %}
+
+                <div class="soc-empty">
+                    No threat classification data available.
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- TOP ATTACKING IPS -->
+
+        <div class="soc-panel">
+
+            <div class="panel-header">
+
+                <h3 class="panel-title">
+                    Top Threat Sources
+                </h3>
+
+                <span class="panel-subtitle">
+                    Most active suspicious IP addresses
+                </span>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                {% if stats.top_attacking_ips %}
+
+                <table class="soc-table">
+
+                    <thead>
+                        <tr>
+                            <th>Source IP</th>
+                            <th>Events</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for ip in stats.top_attacking_ips %}
+
+                        {% set confidence = ((ip.avg_confidence * 100) if ip.avg_confidence else 0) %}
+
+                        <tr>
+
+                            <td class="ip-address">
+                                {{ ip.ip_address }}
+                            </td>
+
+                            <td>
+                                {{ ip.attack_count }}
+                            </td>
+
+                            <td>
+
+                                <div class="confidence-wrapper">
+
+                                    <div class="confidence-bar">
+
+                                        <div class="confidence-fill" data-confidence="{{ confidence }}">
+                                        </div>
+
+                                    </div>
+
+                                    <span class="confidence-text">
+                                        {{ confidence | round(1) }}%
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                {% else %}
+
+                <div class="soc-empty">
+                    No suspicious IP addresses detected.
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT SECURITY EVENTS -->
+
+    <div class="soc-panel activity-panel">
+
+        <div class="panel-header">
+
+            <h3 class="panel-title">
+                Recent Security Events
+            </h3>
+
+            <span class="panel-subtitle">
+                Latest network activity
+            </span>
+
+        </div>
+
+
+        <div class="panel-body">
+
+            {% if stats.recent_predictions %}
+
+            <table class="soc-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Source IP</th>
+                        <th>Classification</th>
+                        <th>Threat Type</th>
+                        <th>Confidence</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for p in stats.recent_predictions %}
+
+                    {% set confidence = ((p.confidence * 100) if p.confidence else 0) %}
+
+                    <tr>
+
+                        <td>
+                            {{ p.timestamp }}
+                        </td>
+
+
+                        <td class="ip-address">
+                            {{ p.ip_address }}
+                        </td>
+
+
+                        <td>
+
+                            {% if p.prediction_result == 'Attack' %}
+
+                            <span class="soc-badge attack-badge">
+                                ● THREAT
+                            </span>
+
+                            {% else %}
+
+                            <span class="soc-badge normal-badge">
+                                ● NORMAL
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+                            {{ p.attack_type }}
+                        </td>
+
+
+                        <td>
+
+                            <div class="confidence-wrapper">
+
+                                <div class="confidence-bar">
+
+                                    <div class="confidence-fill" data-confidence="{{ confidence }}">
+                                    </div>
+
+                                </div>
+
+                                <span class="confidence-text">
+                                    {{ confidence | round(1) }}%
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+
+            {% else %}
+
+            <div class="soc-empty">
+                No recent security events available.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- SET CONFIDENCE BAR WIDTHS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".confidence-fill").forEach(function (bar) {
+
+            const confidence =
+                parseFloat(bar.dataset.confidence) || 0;
+
+            bar.style.width =
+                confidence + "%";
+
+        });
+
+    });
+</script>
+
+{% endblock %}

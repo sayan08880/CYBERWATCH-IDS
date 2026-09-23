@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results - Network IDS{% endblock %}
+{% block content %}
+<h2>Analysis Results: {{ session_info.session_name }}</h2>
+<p style="color:#9ca3af">File: <code>{{ session_info.file_name }}</code></p>
+
+<div class="cards">
+    <div class="card">
+        <div class="label">Total Records</div>
+        <div class="value">{{ session_info.total_records }}</div>
+    </div>
+    <div class="card">
+        <div class="label">Attacks Detected</div>
+        <div class="value" style="color:#f87171">{{ session_info.attacks_detected }}</div>
+    </div>
+    {% if session_info.model_accuracy is not none %}
+    <div class="card">
+        <div class="label">Accuracy</div>
+        <div class="value">{{ (session_info.model_accuracy * 100) | round(1) }}%</div>
+    </div>
+    {% endif %}
+    {% if session_info.model_precision is not none %}
+    <div class="card">
+        <div class="label">Precision</div>
+        <div class="value">{{ (session_info.model_precision * 100) | round(1) }}%</div>
+    </div>
+    {% endif %}
+    {% if session_info.model_f1_score is not none %}
+    <div class="card">
+        <div class="label">F1 Score</div>
+        <div class="value">{{ (session_info.model_f1_score * 100) | round(1) }}%</div>
+    </div>
+    {% endif %}
+</div>
+
+{% if model_metrics %}
+<div class="panel">
+    <h3>Confusion Matrix</h3>
+    <table style="max-width:400px">
+        <tr><th></th><th>Predicted Normal</th><th>Predicted Attack</th></tr>
+        <tr><td><b>Actual Normal</b></td><td>{{ model_metrics.true_negative }}</td><td>{{ model_metrics.false_positive }}</td></tr>
+        <tr><td><b>Actual Attack</b></td><td>{{ model_metrics.false_negative }}</td><td>{{ model_metrics.true_positive }}</td></tr>
+    </table>
+    {% if model_metrics.auc_score %}
+    <p style="margin-top:10px">AUC Score: <b>{{ (model_metrics.auc_score * 100) | round(1) }}%</b></p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+    <h3>Predictions</h3>
+    {% if predictions %}
+    <table>
+        <tr><th>Time</th><th>IP</th><th>Result</th><th>Attack Type</th><th>Confidence</th></tr>
+        {% for p in predictions[:200] %}
+        <tr>
+            <td>{{ p.timestamp }}</td>
+            <td>{{ p.ip_address }}</td>
+            <td>
+                {% if p.prediction == 'Attack' %}
+                <span class="badge badge-attack">Attack</span>
+                {% elif p.prediction == 'Pending' %}
+                <span class="badge badge-pending">Pending</span>
+                {% else %}
+                <span class="badge badge-normal">Normal</span>
+                {% endif %}
+            </td>
+            <td>{{ p.attack_type }}</td>
+            <td>{{ (p.confidence * 100) | round(1) if p.confidence else 0 }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% if predictions|length > 200 %}
+    <p style="color:#6b7280;font-size:13px;margin-top:8px">Showing first 200 of {{ predictions|length }} rows. Use Reports to export the full set.</p>
+    {% endif %}
+    {% else %}
+    <div class="empty">No predictions were generated for this session.</div>
+    {% endif %}
+</div>
+
+<a class="btn btn-secondary" href="{{ url_for('upload') }}">⬅ Analyze another file</a>
+{% endblock %}

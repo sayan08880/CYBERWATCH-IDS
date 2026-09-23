@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}User Management - Network IDS{% endblock %}
+{% block content %}
+<h2>User Management</h2>
+
+<div class="cards">
+    <div class="card"><div class="label">Total Users</div><div class="value">{{ stats.total or 0 }}</div></div>
+    <div class="card"><div class="label">Active</div><div class="value" style="color:#34d399">{{ stats.active or 0 }}</div></div>
+    <div class="card"><div class="label">Inactive</div><div class="value" style="color:#f87171">{{ stats.inactive or 0 }}</div></div>
+    <div class="card"><div class="label">Registered Today</div><div class="value">{{ stats.today_registered or 0 }}</div></div>
+</div>
+
+<div class="panel">
+    <form method="GET" class="filters">
+        <div>
+            <label>Search</label>
+            <input type="text" name="search" value="{{ filters.search }}" placeholder="username or email">
+        </div>
+        <div>
+            <label>Status</label>
+            <select name="status">
+                <option value="" {% if not filters.status %}selected{% endif %}>All</option>
+                <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <div><button type="submit">Filter</button></div>
+        <div><a class="btn" href="{{ url_for('admin_create_user') }}">+ New User</a></div>
+    </form>
+</div>
+
+<div class="panel">
+    <h3>Users ({{ total_users }})</h3>
+    {% if users %}
+    <table>
+        <tr><th>Username</th><th>Email</th><th>Created</th><th>Status</th><th></th></tr>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.created_at }}</td>
+            <td>
+                {% if u.is_active %}
+                <span class="badge badge-normal">Active</span>
+                {% else %}
+                <span class="badge badge-attack">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <form method="POST" action="{{ url_for('admin_toggle_user_status', user_id=u.id) }}" style="display:inline">
+                    <button type="submit" class="btn-secondary">{{ 'Deactivate' if u.is_active else 'Activate' }}</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" style="display:inline"
+                      onsubmit="return confirm('Delete this user permanently?');">
+                    <button type="submit" class="btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">No users found.</div>
+    {% endif %}
+</div>
+{% endblock %}

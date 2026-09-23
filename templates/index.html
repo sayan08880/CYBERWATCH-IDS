@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}About - Network IDS{% endblock %}
+{% block content %}
+<h2>About Network IDS</h2>
+<div class="panel">
+    <p>
+        Network IDS is a real-time network intrusion detection system combining a
+        rule-based packet monitor, a trained machine-learning classifier, and
+        automatic firewall blocking, all managed from this web dashboard.
+    </p>
+    <ul>
+        <li><b>Dashboard</b> — overview of recent predictions and attack statistics.</li>
+        <li><b>Live Monitoring</b> — starts the packet-capture monitor and streams its log.</li>
+        <li><b>Live Prediction</b> — run a single feature vector through the ML model.</li>
+        <li><b>Upload / Analyze</b> — batch-predict a CSV of network flow records.</li>
+        <li><b>Reports</b> — filter, browse and export past predictions (CSV/PDF).</li>
+        <li><b>Blocked IPs</b> — see and manage IPs blocked by the IDS.</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,646 @@
+{% extends "base.html" %}
+
+{% block title %}Live Prediction - Network IDS{% endblock %}
+
+{% block content %}
+
+<style>
+    .prediction-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* HEADER */
+    .prediction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+        gap: 20px;
+    }
+
+    .prediction-header h2 {
+        margin: 0 0 8px;
+        font-size: 30px;
+        font-weight: 700;
+        color: #e5edf8;
+    }
+
+    .prediction-header p {
+        margin: 0;
+        color: #8fa0b8;
+        font-size: 14px;
+    }
+
+    .prediction-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border: 1px solid rgba(52, 211, 153, 0.25);
+        background: rgba(16, 185, 129, 0.08);
+        border-radius: 8px;
+        color: #7ee2b8;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #34d399;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #34d399;
+    }
+
+    /* MAIN GRID */
+    .prediction-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 350px;
+        gap: 20px;
+        align-items: start;
+    }
+
+    /* PANELS */
+    .prediction-card {
+        background: #1f2b3d;
+        border: 1px solid #31425b;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .prediction-card-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid #31425b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .prediction-card-header h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #e5edf8;
+    }
+
+    .prediction-card-header span {
+        color: #71829b;
+        font-size: 12px;
+    }
+
+    .prediction-card-body {
+        padding: 22px;
+    }
+
+    /* INFO BOX */
+    .prediction-info {
+        display: flex;
+        gap: 12px;
+        padding: 14px 16px;
+        margin-bottom: 22px;
+        background: rgba(59, 130, 246, 0.07);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 10px;
+        color: #9caec6;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .info-icon {
+        color: #60a5fa;
+        font-size: 18px;
+    }
+
+    /* FEATURE GRID */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 18px;
+    }
+
+    .feature-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .feature-group label {
+        color: #a8b7cb;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .feature-group input {
+        width: 100%;
+        box-sizing: border-box;
+        background: #162131;
+        border: 1px solid #344862;
+        border-radius: 8px;
+        color: #e5edf8;
+        padding: 12px 13px;
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    .feature-group input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    /* ACTION AREA */
+    .prediction-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid #31425b;
+        gap: 15px;
+    }
+
+    .feature-count {
+        color: #73839b;
+        font-size: 12px;
+    }
+
+    .predict-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 13px 24px;
+        min-width: 190px;
+        background: linear-gradient(90deg, #2563eb, #0891b2);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .predict-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
+    }
+
+    .predict-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* RESULT PANEL */
+    .result-card {
+        position: sticky;
+        top: 20px;
+    }
+
+    .result-empty {
+        text-align: center;
+        padding: 50px 15px;
+        color: #71829b;
+    }
+
+    .result-empty .result-icon {
+        font-size: 40px;
+        margin-bottom: 15px;
+        opacity: 0.7;
+    }
+
+    .result-empty h4 {
+        margin: 0 0 8px;
+        color: #b9c5d6;
+        font-size: 15px;
+    }
+
+    .result-empty p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .result-data {
+        display: none;
+    }
+
+    .result-status {
+        padding: 22px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .result-status.attack {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .result-status.normal {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .result-label {
+        font-size: 11px;
+        color: #8292a9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+
+    .result-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .result-value.attack {
+        color: #f87171;
+    }
+
+    .result-value.normal {
+        color: #34d399;
+    }
+
+    .result-details {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        border: 1px solid #31425b;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px;
+        background: #182436;
+        border-bottom: 1px solid #31425b;
+    }
+
+    .result-row:last-child {
+        border-bottom: none;
+    }
+
+    .result-row span:first-child {
+        color: #8191a8;
+        font-size: 12px;
+    }
+
+    .result-row span:last-child {
+        color: #e5edf8;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+    }
+
+    .confidence-bar {
+        width: 100%;
+        height: 7px;
+        background: #29384d;
+        border-radius: 10px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #2563eb, #22c55e);
+        transition: width 0.5s ease;
+    }
+
+    /* ERROR */
+    .prediction-error {
+        padding: 14px;
+        border-radius: 8px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1000px) {
+        .prediction-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .result-card {
+            position: static;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .prediction-header {
+            flex-direction: column;
+        }
+
+        .feature-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .prediction-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .predict-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="prediction-page">
+
+    <div class="prediction-header">
+        <div>
+            <h2>Live Threat Prediction</h2>
+            <p>Analyze a single network traffic sample using the intrusion detection model.</p>
+        </div>
+
+        <div class="prediction-status">
+            <span class="status-dot"></span>
+            MODEL READY
+        </div>
+    </div>
+
+    {% if not features %}
+
+    <div class="prediction-card">
+        <div class="prediction-card-header">
+            <h3>Model Status</h3>
+        </div>
+
+        <div class="prediction-card-body">
+            <div class="prediction-error">
+                <strong>Model unavailable.</strong><br><br>
+                The ML model isn't loaded, so prediction features cannot be displayed.
+                Add the trained model files to the <code>models/</code> folder and restart the application.
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+
+    <div class="prediction-grid">
+
+        <!-- LEFT: INPUT FORM -->
+        <div class="prediction-card">
+
+            <div class="prediction-card-header">
+                <div>
+                    <h3>Network Feature Analysis</h3>
+                    <span>Enter traffic parameters for real-time classification</span>
+                </div>
+            </div>
+
+            <div class="prediction-card-body">
+
+                <div class="prediction-info">
+                    <div class="info-icon">ⓘ</div>
+                    <div>
+                        Enter the network traffic feature values below. All fields start at
+                        <strong>0</strong> and can be modified before running the prediction.
+                    </div>
+                </div>
+
+                <form id="predict-form">
+
+                    <div class="feature-grid">
+
+                        {% for feature in features %}
+                        <div class="feature-group">
+                            <label title="{{ feature }}">{{ feature }}</label>
+
+                            <input type="number" step="any" name="{{ feature }}" value="0">
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="prediction-actions">
+
+                        <div class="feature-count">
+                            {{ features|length }} network features loaded
+                        </div>
+
+                        <button type="submit" class="predict-btn" id="predict-btn">
+                            ▶ Run Threat Analysis
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="prediction-card result-card">
+
+            <div class="prediction-card-header">
+                <div>
+                    <h3>Prediction Result</h3>
+                    <span>Model classification output</span>
+                </div>
+            </div>
+
+            <div class="prediction-card-body">
+
+                <!-- EMPTY STATE -->
+                <div class="result-empty" id="result-empty">
+
+                    <div class="result-icon">◈</div>
+
+                    <h4>Waiting for Analysis</h4>
+
+                    <p>
+                        Configure the network features and run the threat analysis
+                        to view the classification result.
+                    </p>
+
+                </div>
+
+                <!-- RESULT STATE -->
+                <div class="result-data" id="result-data">
+
+                    <div class="result-status" id="result-status">
+
+                        <div class="result-label">
+                            Detection Classification
+                        </div>
+
+                        <div class="result-value" id="prediction-value">
+                            --
+                        </div>
+
+                    </div>
+
+                    <div class="result-details">
+
+                        <div class="result-row">
+                            <span>Attack Type</span>
+                            <span id="attack-type">--</span>
+                        </div>
+
+                        <div class="result-row">
+                            <span>Confidence</span>
+                            <span id="confidence-value">0%</span>
+                        </div>
+
+                        <div style="padding:15px;background:#182436;">
+                            <div style="font-size:12px;color:#8191a8;">
+                                Confidence Score
+                            </div>
+
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ERROR STATE -->
+                <div id="result-error" style="display:none;"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const predictForm = document.getElementById('predict-form');
+        const predictButton = document.getElementById('predict-btn');
+
+        const resultEmpty = document.getElementById('result-empty');
+        const resultData = document.getElementById('result-data');
+        const resultError = document.getElementById('result-error');
+
+        const resultStatus = document.getElementById('result-status');
+        const predictionValue = document.getElementById('prediction-value');
+        const attackType = document.getElementById('attack-type');
+        const confidenceValue = document.getElementById('confidence-value');
+        const confidenceFill = document.getElementById('confidence-fill');
+
+
+        predictForm.addEventListener('submit', async function (e) {
+
+            e.preventDefault();
+
+            predictButton.disabled = true;
+            predictButton.textContent = 'Analyzing Traffic...';
+
+            resultError.style.display = 'none';
+
+            const formData = new FormData(e.target);
+
+            try {
+
+                const resp = await fetch(
+                    "{{ url_for('live_prediction') }}",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                const data = await resp.json();
+
+                if (data.success) {
+
+                    const r = data.result;
+
+                    const confidence = r.confidence
+                        ? (r.confidence * 100)
+                        : 0;
+
+                    resultEmpty.style.display = 'none';
+                    resultData.style.display = 'block';
+
+                    predictionValue.textContent = r.prediction;
+
+                    attackType.textContent = r.attack_type;
+
+                    confidenceValue.textContent =
+                        confidence.toFixed(1) + '%';
+
+                    confidenceFill.style.width =
+                        Math.min(confidence, 100) + '%';
+
+
+                    resultStatus.classList.remove(
+                        'attack',
+                        'normal'
+                    );
+
+                    predictionValue.classList.remove(
+                        'attack',
+                        'normal'
+                    );
+
+
+                    if (r.prediction === 'Attack') {
+
+                        resultStatus.classList.add('attack');
+                        predictionValue.classList.add('attack');
+
+                    } else {
+
+                        resultStatus.classList.add('normal');
+                        predictionValue.classList.add('normal');
+
+                    }
+
+                } else {
+
+                    resultEmpty.style.display = 'none';
+                    resultData.style.display = 'none';
+
+                    resultError.style.display = 'block';
+
+                    resultError.innerHTML =
+                        '<div class="prediction-error">' +
+                        '<strong>Prediction Failed</strong><br><br>' +
+                        data.error +
+                        '</div>';
+
+                }
+
+            } catch (error) {
+
+                resultEmpty.style.display = 'none';
+                resultData.style.display = 'none';
+
+                resultError.style.display = 'block';
+
+                resultError.innerHTML =
+                    '<div class="prediction-error">' +
+                    '<strong>Connection Error</strong><br><br>' +
+                    'Unable to communicate with the prediction service.' +
+                    '</div>';
+
+            }
+
+            predictButton.disabled = false;
+            predictButton.textContent = '▶ Run Threat Analysis';
+
+        });
+
+    </script>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Network IDS{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #111827;
+            color: #e5e7eb;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        a { color: #60a5fa; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #1f2937;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+        .sidebar h1 {
+            font-size: 18px;
+            text-align: center;
+            margin: 0 0 20px 0;
+            color: #60a5fa;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px 20px;
+            color: #d1d5db;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #374151;
+            color: white;
+            text-decoration: none;
+        }
+        .sidebar .section {
+            margin-top: 15px;
+            padding: 0 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+
+        /* Main content */
+        .main { flex: 1; padding: 24px 32px; overflow-x: auto; }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .topbar .user { color: #9ca3af; font-size: 14px; }
+
+        h2 { margin-top: 0; }
+
+        /* Flash messages */
+        .flash { padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; }
+        .flash-success { background: #064e3b; color: #6ee7b7; }
+        .flash-danger { background: #7f1d1d; color: #fca5a5; }
+        .flash-warning { background: #78350f; color: #fcd34d; }
+        .flash-info { background: #1e3a8a; color: #93c5fd; }
+
+        /* Cards / stats */
+        .cards { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+        .card {
+            background: #1f2937;
+            border-radius: 10px;
+            padding: 18px 22px;
+            min-width: 160px;
+            flex: 1;
+        }
+        .card .label { font-size: 12px; color: #9ca3af; text-transform: uppercase; }
+        .card .value { font-size: 28px; font-weight: bold; margin-top: 6px; }
+
+        .panel { background: #1f2937; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #374151; font-size: 14px; }
+        th { color: #9ca3af; text-transform: uppercase; font-size: 11px; }
+        tr:hover { background: #26303f; }
+
+        /* Badges */
+        .badge { padding: 3px 10px; border-radius: 999px; font-size: 12px; display: inline-block; }
+        .badge-attack { background: #7f1d1d; color: #fca5a5; }
+        .badge-normal { background: #064e3b; color: #6ee7b7; }
+        .badge-pending { background: #78350f; color: #fcd34d; }
+
+        /* Forms */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0 14px 0;
+            border-radius: 5px;
+            border: 1px solid #374151;
+            background: #111827;
+            color: white;
+        }
+        label { font-size: 13px; color: #9ca3af; }
+        button, .btn {
+            padding: 10px 18px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-block;
+        }
+        button:hover, .btn:hover { background: #1d4ed8; text-decoration: none; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-secondary { background: #4b5563; }
+        .btn-secondary:hover { background: #374151; }
+
+        .filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+        .filters > div { min-width: 160px; }
+
+        .empty { color: #6b7280; padding: 30px; text-align: center; }
+        code { background: #111827; padding: 2px 6px; border-radius: 4px; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+{% if session.get('user_id') %}
+<div class="sidebar">
+    <h1>🛡️ Network IDS</h1>
+    <a href="{{ url_for('dashboard') }}">📊 Dashboard</a>
+    <a href="{{ url_for('monitor_page') }}">📡 Live Monitoring</a>
+    <a href="{{ url_for('live_prediction') }}">🔮 Live Prediction</a>
+    <a href="{{ url_for('upload') }}">📁 Upload / Analyze</a>
+    <a href="{{ url_for('reports') }}">📄 Reports</a>
+    <a href="{{ url_for('manual_analysis') }}">🕵️ Manual Analysis</a>
+    <a href="{{ url_for('test_cases') }}">🧪 Test Cases</a>
+    <a href="{{ url_for('blocked_ips') }}">⛔ Blocked IPs</a>
+    {% if session.get('username') == 'admin' %}
+    <div class="section">Admin</div>
+    <a href="{{ url_for('admin_users') }}">👥 Users</a>
+    {% endif %}
+    <div class="section">Account</div>
+    <a href="{{ url_for('logout') }}">🚪 Logout</a>
+</div>
+{% endif %}
+
+<div class="main">
+    {% if session.get('user_id') %}
+    <div class="topbar">
+        <div></div>
+        <div class="user">Signed in as <b>{{ session.get('username') }}</b></div>
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

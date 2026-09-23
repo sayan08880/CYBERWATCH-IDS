@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+
+{% block title %}Live Monitoring - CYBERWATCH{% endblock %}
+
+{% block content %}
+
+<style>
+    .monitor-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-bottom: 30px;
+    }
+
+    /* HEADER */
+    .monitor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+    .monitor-title h2 {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 700;
+        color: #f1f5f9;
+    }
+
+    .monitor-title p {
+        margin: 8px 0 0;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .live-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.7);
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #64748b;
+        box-shadow: 0 0 8px rgba(100, 116, 139, 0.6);
+    }
+
+    .status-dot.running {
+        background: #34d399;
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.8);
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.3);
+            opacity: 0.6;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* CONTROL PANEL */
+    .monitor-controls {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .control-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .control-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        font-size: 22px;
+    }
+
+    .control-info h3 {
+        margin: 0;
+        color: #e2e8f0;
+        font-size: 17px;
+    }
+
+    .control-info p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .control-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .soc-button {
+        border: none;
+        border-radius: 8px;
+        padding: 11px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .start-button {
+        background: linear-gradient(135deg, #2563eb, #0891b2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    }
+
+    .start-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .stop-button {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .stop-button:hover {
+        background: rgba(239, 68, 68, 0.18);
+    }
+
+    /* TERMINAL PANEL */
+    .terminal-panel {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .terminal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 17px 22px;
+        border-bottom: 1px solid #334155;
+        background: rgba(15, 23, 42, 0.35);
+    }
+
+    .terminal-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .terminal-title h3 {
+        margin: 0;
+        color: #e2e8f0;
+        font-size: 16px;
+    }
+
+    .terminal-subtitle {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .terminal-dots {
+        display: flex;
+        gap: 6px;
+    }
+
+    .terminal-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .dot-red {
+        background: #ef4444;
+    }
+
+    .dot-yellow {
+        background: #f59e0b;
+    }
+
+    .dot-green {
+        background: #22c55e;
+    }
+
+    .log-container {
+        padding: 0;
+        background: #0b1220;
+    }
+
+    #log {
+        margin: 0;
+        min-height: 480px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 22px;
+        color: #cbd5e1;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    #log:empty::before {
+        content: "> Waiting for monitor output...";
+        color: #64748b;
+    }
+
+    /* STATUS BAR */
+    .monitor-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 22px;
+        border-top: 1px solid #1e293b;
+        background: #111827;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    #status {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    @media (max-width: 800px) {
+
+        .monitor-header,
+        .monitor-controls {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .control-buttons {
+            width: 100%;
+        }
+
+        .soc-button {
+            flex: 1;
+        }
+    }
+</style>
+
+
+<div class="monitor-page">
+
+    <!-- PAGE HEADER -->
+    <div class="monitor-header">
+
+        <div class="monitor-title">
+            <h2>Live Network Monitoring</h2>
+
+            <p>
+                Real-time packet analysis and intrusion detection activity.
+            </p>
+        </div>
+
+        <div class="live-status">
+            <span id="status-dot" class="status-dot"></span>
+            <span id="status-label">Monitor Offline</span>
+        </div>
+
+    </div>
+
+
+    <!-- MONITOR CONTROL PANEL -->
+    <div class="monitor-controls">
+
+        <div class="control-info">
+
+            <div class="control-icon">
+                📡
+            </div>
+
+            <div>
+                <h3>Network Packet Monitor</h3>
+
+                <p>
+                    Start the IDS engine to capture and analyze live network traffic.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="control-buttons">
+
+            <button id="start-btn" class="soc-button start-button" onclick="startMonitor()">
+                ▶ Start Monitoring
+            </button>
+
+            <button id="stop-btn" class="soc-button stop-button" onclick="stopMonitor()">
+                ■ Stop
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- LIVE TERMINAL -->
+    <div class="terminal-panel">
+
+        <div class="terminal-header">
+
+            <div class="terminal-title">
+
+                <div class="terminal-dots">
+                    <span class="dot-red"></span>
+                    <span class="dot-yellow"></span>
+                    <span class="dot-green"></span>
+                </div>
+
+                <h3>Live Detection Console</h3>
+
+                <span class="terminal-subtitle">
+                    Streaming monitor.py output
+                </span>
+
+            </div>
+
+            <span style="color:#22c55e;font-size:12px;">
+                ● LIVE STREAM
+            </span>
+
+        </div>
+
+
+        <div class="log-container">
+
+            <pre id="log"></pre>
+
+        </div>
+
+
+        <div class="monitor-footer">
+
+            <span id="status">
+                Status: stopped
+            </span>
+
+            <span>
+                CYBERWATCH IDS • Real-time Monitoring
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let source = null;
+
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+
+    const statusDot = document.getElementById('status-dot');
+    const statusLabel = document.getElementById('status-label');
+
+
+    function appendLine(line) {
+
+        if (line === '[keepalive]') return;
+
+        logEl.textContent += line + "\n";
+
+        logEl.scrollTop = logEl.scrollHeight;
+
+    }
+
+
+    function connectStream() {
+
+        if (source) return;
+
+        source = new EventSource("{{ url_for('api_stream') }}");
+
+        source.onmessage = (e) => appendLine(e.data);
+
+        source.onerror = () => {
+            /* Browser automatically reconnects */
+        };
+
+    }
+
+
+    async function startMonitor() {
+
+        statusEl.textContent = 'Status: starting...';
+
+        statusLabel.textContent = 'Starting...';
+
+        const resp = await fetch(
+            "{{ url_for('api_start') }}",
+            {
+                method: 'POST'
+            }
+        );
+
+        const data = await resp.json();
+
+
+        if (data.running) {
+
+            statusEl.textContent = 'Status: running';
+
+            statusLabel.textContent = 'Monitor Active';
+
+            statusDot.classList.add('running');
+
+        }
+
+        else {
+
+            statusEl.textContent = 'Status: failed to start';
+
+            statusLabel.textContent = 'Monitor Error';
+
+            statusDot.classList.remove('running');
+
+        }
+
+
+        connectStream();
+
+    }
+
+
+    async function stopMonitor() {
+
+        await fetch(
+            "{{ url_for('api_stop') }}",
+            {
+                method: 'POST'
+            }
+        );
+
+        statusEl.textContent = 'Status: stopped';
+
+        statusLabel.textContent = 'Monitor Offline';
+
+        statusDot.classList.remove('running');
+
+    }
+
+
+    connectStream();
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,807 @@
+{% extends "base.html" %}
+
+{% block title %}Test Cases - Network IDS{% endblock %}
+
+{% block content %}
+
+<div class="testcases-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">SECURITY VALIDATION</div>
+            <h1>Test Cases</h1>
+            <p>
+                Simulated security scenarios for validating the Network IDS
+                detection pipeline and testing threat detection capabilities.
+            </p>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            TEST ENVIRONMENT READY
+        </div>
+    </div>
+
+
+    <!-- SECURITY OVERVIEW -->
+    <div class="test-summary">
+
+        <div class="summary-card">
+            <div class="summary-icon">🧪</div>
+            <div>
+                <div class="summary-label">TOTAL TEST CASES</div>
+                <div class="summary-value">{{ test_cases | length }}</div>
+                <div class="summary-description">
+                    Available security scenarios
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon threat-icon">⚠</div>
+            <div>
+                <div class="summary-label">ATTACK SIMULATIONS</div>
+                <div class="summary-value">{{ test_cases | length }}</div>
+                <div class="summary-description">
+                    IDS detection validation
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon success-icon">✓</div>
+            <div>
+                <div class="summary-label">TEST STATUS</div>
+                <div class="summary-value success-value">READY</div>
+                <div class="summary-description">
+                    Safe testing environment
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- INFORMATION PANEL -->
+    <div class="test-info-panel">
+
+        <div class="info-icon">🛡</div>
+
+        <div class="info-content">
+            <h3>IDS Security Testing</h3>
+
+            <p>
+                Use these scenarios to validate whether your intrusion detection
+                system can correctly identify suspicious network activity.
+                Only perform testing in an environment you own or are authorized
+                to test.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- TEST CASES -->
+    <div class="test-section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Available Test Scenarios</h2>
+                <p>Security events configured for IDS validation</p>
+            </div>
+
+            <div class="test-count">
+                {{ test_cases | length }} TESTS AVAILABLE
+            </div>
+
+        </div>
+
+
+        {% if test_cases %}
+
+        <div class="test-grid">
+
+            {% for t in test_cases %}
+
+            <div class="test-card">
+
+                <div class="test-card-top">
+
+                    <div class="attack-type">
+                        {{ t.attack_type }}
+                    </div>
+
+                    <div class="status-badge">
+                        <span class="status-dot-small"></span>
+                        {{ t.status }}
+                    </div>
+
+                </div>
+
+
+                <h3>{{ t.name }}</h3>
+
+                <p class="test-description">
+                    {{ t.description }}
+                </p>
+
+
+                <div class="test-metrics">
+
+                    <div class="metric">
+
+                        <span class="metric-label">
+                            HISTORICAL SUCCESS RATE
+                        </span>
+
+                        <span class="metric-value">
+                            {{ t.success_rate }}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div class="progress-fill" data-success-rate="{{ t.success_rate }}"></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="test-footer">
+
+                    <div class="last-run">
+
+                        <span class="footer-label">
+                            LAST RUN
+                        </span>
+
+                        <span class="footer-value">
+                            {{ t.last_run }}
+                        </span>
+
+                    </div>
+
+                    <div class="test-ready">
+                        READY
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-test-state">
+
+            <div class="empty-icon">🧪</div>
+
+            <h3>No Test Cases Available</h3>
+
+            <p>
+                No security test scenarios are currently configured.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- TESTING GUIDE -->
+    <div class="testing-guide">
+
+        <div class="guide-header">
+
+            <div class="guide-icon">
+                📋
+            </div>
+
+            <div>
+                <h2>Testing Guidelines</h2>
+
+                <p>
+                    Follow these steps when validating your Network IDS.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="guide-grid">
+
+            <div class="guide-step">
+
+                <div class="step-number">01</div>
+
+                <h3>Start Monitoring</h3>
+
+                <p>
+                    Open Live Monitoring and start the IDS packet monitor.
+                </p>
+
+            </div>
+
+
+            <div class="guide-step">
+
+                <div class="step-number">02</div>
+
+                <h3>Run Test Scenario</h3>
+
+                <p>
+                    Generate authorized test traffic from your controlled lab.
+                </p>
+
+            </div>
+
+
+            <div class="guide-step">
+
+                <div class="step-number">03</div>
+
+                <h3>Analyze Detection</h3>
+
+                <p>
+                    Check whether the IDS classified the event correctly.
+                </p>
+
+            </div>
+
+
+            <div class="guide-step">
+
+                <div class="step-number">04</div>
+
+                <h3>Review Results</h3>
+
+                <p>
+                    Investigate alerts from Reports and Manual Analysis.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+    .testcases-page {
+        width: 100%;
+    }
+
+
+    /* PAGE HEADER */
+
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .eyebrow {
+        color: #7f9bbd;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #f3f6fb;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        margin-top: 10px;
+        color: #94a7bf;
+        font-size: 14px;
+    }
+
+    .system-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #72e3b4;
+        border: 1px solid #245a50;
+        background: rgba(27, 94, 76, 0.15);
+        padding: 10px 16px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4ee3a6;
+        box-shadow: 0 0 10px rgba(78, 227, 166, 0.7);
+    }
+
+
+    /* SUMMARY CARDS */
+
+    .test-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        min-height: 130px;
+        padding: 22px;
+        border: 1px solid #354861;
+        border-radius: 12px;
+        background: #222f42;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .summary-card::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        right: -25px;
+        bottom: -35px;
+        border-radius: 50%;
+        background: rgba(62, 110, 175, 0.12);
+    }
+
+    .summary-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #243c5c;
+        font-size: 24px;
+    }
+
+    .threat-icon {
+        background: rgba(179, 67, 67, 0.2);
+    }
+
+    .success-icon {
+        background: rgba(39, 133, 98, 0.2);
+    }
+
+    .summary-label {
+        color: #91a5be;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .summary-value {
+        margin-top: 7px;
+        color: #f1f5fa;
+        font-size: 27px;
+        font-weight: 700;
+    }
+
+    .success-value {
+        color: #65dca5;
+        font-size: 22px;
+    }
+
+    .summary-description {
+        margin-top: 5px;
+        color: #7d91aa;
+        font-size: 11px;
+    }
+
+
+    /* INFORMATION PANEL */
+
+    .test-info-panel {
+        display: flex;
+        gap: 18px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid #31506f;
+        border-radius: 12px;
+        background: linear-gradient(90deg,
+                rgba(31, 72, 112, 0.18),
+                rgba(34, 47, 66, 1));
+    }
+
+    .info-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #203a58;
+        font-size: 23px;
+    }
+
+    .info-content h3 {
+        margin: 0 0 7px;
+        color: #edf3fa;
+        font-size: 16px;
+    }
+
+    .info-content p {
+        margin: 0;
+        color: #91a6bd;
+        line-height: 1.7;
+        font-size: 13px;
+    }
+
+
+    /* TEST SECTION */
+
+    .test-section {
+        padding: 22px;
+        border: 1px solid #354861;
+        border-radius: 12px;
+        background: #222f42;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 18px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #354861;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        color: #edf3fa;
+        font-size: 18px;
+    }
+
+    .section-header p {
+        margin: 6px 0 0;
+        color: #8498b0;
+        font-size: 12px;
+    }
+
+    .test-count {
+        color: #79a8dd;
+        background: #1c314a;
+        border: 1px solid #345879;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+
+    /* TEST CARDS */
+
+    .test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 18px;
+    }
+
+    .test-card {
+        padding: 20px;
+        border: 1px solid #354861;
+        border-radius: 10px;
+        background: #1d2939;
+        transition: 0.2s ease;
+    }
+
+    .test-card:hover {
+        transform: translateY(-3px);
+        border-color: #4c79a6;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .test-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .attack-type {
+        color: #8eb8e8;
+        background: rgba(54, 100, 151, 0.2);
+        border: 1px solid #315b86;
+        padding: 6px 10px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #70dba8;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .status-dot-small {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #56d99e;
+    }
+
+    .test-card h3 {
+        margin: 18px 0 8px;
+        color: #eef4fb;
+        font-size: 17px;
+    }
+
+    .test-description {
+        min-height: 55px;
+        margin: 0;
+        color: #91a4bb;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+
+    /* METRICS */
+
+    .test-metrics {
+        margin-top: 20px;
+    }
+
+    .metric {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 9px;
+    }
+
+    .metric-label {
+        color: #71869e;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .metric-value {
+        color: #dce9f8;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #111b29;
+    }
+
+    .progress-fill {
+        width: 0;
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #3d79c5, #38c7a5);
+    }
+
+
+    /* FOOTER */
+
+    .test-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #304155;
+    }
+
+    .footer-label {
+        display: block;
+        color: #687d95;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .footer-value {
+        display: block;
+        margin-top: 5px;
+        color: #a9bdd3;
+        font-size: 11px;
+    }
+
+    .test-ready {
+        color: #64dba3;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+
+    /* EMPTY STATE */
+
+    .empty-test-state {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 42px;
+    }
+
+    .empty-test-state h3 {
+        margin-top: 15px;
+        color: #e8eff8;
+    }
+
+    .empty-test-state p {
+        color: #8498b0;
+    }
+
+
+    /* TESTING GUIDE */
+
+    .testing-guide {
+        margin-top: 25px;
+        padding: 22px;
+        border: 1px solid #354861;
+        border-radius: 12px;
+        background: #222f42;
+    }
+
+    .guide-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .guide-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #233b58;
+        font-size: 21px;
+    }
+
+    .guide-header h2 {
+        margin: 0;
+        color: #eef4fb;
+        font-size: 18px;
+    }
+
+    .guide-header p {
+        margin: 5px 0 0;
+        color: #8498b0;
+        font-size: 12px;
+    }
+
+    .guide-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .guide-step {
+        padding: 17px;
+        border: 1px solid #354861;
+        border-radius: 9px;
+        background: #1d2939;
+    }
+
+    .step-number {
+        color: #5792dc;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .guide-step h3 {
+        margin: 13px 0 7px;
+        color: #e8eff8;
+        font-size: 14px;
+    }
+
+    .guide-step p {
+        margin: 0;
+        color: #879bb2;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1000px) {
+
+        .guide-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+    }
+
+    @media (max-width: 800px) {
+
+        .page-header {
+            flex-direction: column;
+        }
+
+        .test-summary {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .guide-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+    }
+</style>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const progressBars = document.querySelectorAll(".progress-fill");
+
+        progressBars.forEach(function (bar) {
+
+            const rate = parseFloat(
+                bar.getAttribute("data-success-rate")
+            );
+
+            if (!isNaN(rate)) {
+
+                const safeRate = Math.max(
+                    0,
+                    Math.min(100, rate)
+                );
+
+                bar.style.width = safeRate + "%";
+            }
+
+        });
+
+    });
+
+</script>
+
+{% endblock %}

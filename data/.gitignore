@@ -1,0 +1,4 @@
+# Ignore the large raw dataset files, keep the folder + docs in version control
+*.csv
+*.zip
+!README.md

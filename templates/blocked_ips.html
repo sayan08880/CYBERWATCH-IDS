@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Blocked IPs - Network IDS{% endblock %}
+{% block content %}
+<h2>Blocked IPs</h2>
+
+{% if is_admin %}
+<div class="panel">
+    <h3>Manually Block an IP</h3>
+    <form method="POST" action="{{ url_for('block_ip_form') }}" class="filters">
+        <div>
+            <label>IP Address</label>
+            <input type="text" name="ip_address" placeholder="e.g. 192.168.1.50" required>
+        </div>
+        <div>
+            <label>Attack Type</label>
+            <input type="text" name="attack_type" value="Manual Pattern">
+        </div>
+        <div>
+            <label>Reason</label>
+            <input type="text" name="reason" value="Manually blocked by admin">
+        </div>
+        <div>
+            <button type="submit">Block IP</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="panel">
+    <h3>Currently Blocked ({{ blocked_ips|length }})</h3>
+    {% if blocked_ips %}
+    <table>
+        <tr><th>IP</th><th>Attack Type</th><th>Reason</th><th>Blocked At</th><th>Hits</th><th></th></tr>
+        {% for b in blocked_ips %}
+        <tr>
+            <td>{{ b.ip_address }}</td>
+            <td>{{ b.attack_type }}</td>
+            <td>{{ b.reason }}</td>
+            <td>{{ b.blocked_at }}</td>
+            <td>{{ b.block_count }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('unblock_ip', ip_address=b.ip_address) }}" style="margin:0">
+                    <button type="submit" class="btn-secondary">Unblock</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">No IPs are currently blocked.</div>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <h3>Recently Unblocked</h3>
+    {% if unblocked_ips %}
+    <table>
+        <tr><th>IP</th><th>Attack Type</th><th>Unblocked At</th><th>Unblocked By</th></tr>
+        {% for u in unblocked_ips %}
+        <tr>
+            <td>{{ u.ip_address }}</td>
+            <td>{{ u.attack_type }}</td>
+            <td>{{ u.unblocked_at }}</td>
+            <td>{{ u.unblocked_by }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">No history yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

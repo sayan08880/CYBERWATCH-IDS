@@ -1,0 +1,8 @@
+What's Git ?
+Git is version control software use to control the code version traking & updation
+
+How to Initilized Git ?
+git init --> (Creating the .git folder to track the history of your code; Bydefult : Master Branch)
+git status --> (View The git Status On this folder)
+git init -b main --> (creting the version control in Main branch)
+
