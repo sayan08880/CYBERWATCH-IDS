@@ -177,3 +177,13 @@ the model.
 - The default admin password is `password123` – **change it immediately**
   for anything beyond local testing.
 - Only run the test attack commands on networks you own or are allowed to test.
+
+## Security Recommendations
+
+Before deploying this project:
+
+- Change the default admin password.
+- Use a strong, unique Flask secret key.
+- Run packet capture only on networks you own or have permission to monitor.
+- Review automatic firewall-blocking rules before enabling them.
+- Never commit passwords, API keys, or other secrets to GitHub.
